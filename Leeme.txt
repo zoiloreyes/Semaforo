@@ -1,0 +1,3 @@
+Para abrir este programa se requiere de node.
+una vez descargado desde una terminal abre server.js
+y accede a 127.0.0.1:8080 desde un navegador

@@ -1,0 +1,29 @@
+.caja {
+	background-color: black;
+	height: auto;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.luz{
+	background-color: gray;
+	width: 60%;
+	margin-left: 20%;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	border-radius: 50%;
+	padding-top: 60%;
+	align: center;
+}
+
+#rojo{
+	background-color: rgb(165,0,0);
+}
+
+#amarillo{
+	background-color: rgb(165,165,0);
+}
+
+#verde{
+	background-color: green;
+}

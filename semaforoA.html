@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Semáforo Digital</title>
+		<script
+	  src="https://code.jquery.com/jquery-3.1.1.min.js"
+	  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+	  crossorigin="anonymous"></script>
+
+	  <!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+		<link rel="stylesheet" href="index.css">
+
+		<script type="text/javascript" 
+        src="http://localhost:8081/faye/client.js">
+        </script>
+</head>
+<body>
+<div class="container-fluid">
+	<div class="row">
+		<h1>Semáforo A</h1>
+	</div>
+	<div class="row">
+		<div class="col-xs-12 col-md-4 col-md-offset-4 caja">
+			<div id="rojo" class="luz encendido"></div>
+			<div id="amarillo" class="luz"></div>
+			<div id="verde" class="luz"></div>
+		</div>
+	</div>
+
+	<div class="row">
+		<a href="./index.html" class="btn btn-success col-xs-10 col-xs-offset-1">Regresar</a>
+	</div>
+</div>
+
+<script type="text/javascript">
+	var currentColor;
+	var faye_client = new Faye.Client('http://127.0.0.1:8081/faye');
+	var redIsOn = false;
+	var yellowIsOn = false;
+	var greenIsOn = false;
+		var faye_message_subscription = faye_client.subscribe('/temporizador', function(message)
+		{   
+			currentColor = message.lightCurrentColorB;
+			prepareLight(currentColor);
+			
+		});	
+
+	function prepareLight(nombre){
+		switch(nombre){
+			case 'rojo':
+				turnRed();
+				break;
+			case 'verde':
+				turnGreen();
+				break;
+			case 'amarillo':
+				turnYellow();
+				break;
+
+		}
+	}
+	function rgb2hex(rgb) {
+	    rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+	    function hex(x) {
+	        return ("0" + parseInt(x).toString(16)).slice(-2);
+	    }
+	    return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
+	}
+
+	function turnRed(){
+		if(!redIsOn){
+			turnOn("#rojo");
+			if(yellowIsOn){
+				turnOff("#amarillo");
+				yellowIsOn = false;
+			}else if(greenIsOn){
+				turnOff("#verde");
+				greenIsOn = false;
+			}
+			redIsOn = true;
+		}
+	}
+
+	function turnGreen(){
+		if(!greenIsOn){
+			turnOn("#verde");
+			if(yellowIsOn){
+				turnOff("#amarillo");
+				yellowIsOn = false;
+			}else if(redIsOn){
+				turnOff("#rojo");
+				redIsOn = false;
+			}
+			greenIsOn = true;
+		}
+	}
+	function turnYellow(){
+		if(!yellowIsOn){
+			turnOn("#amarillo");
+			if(redIsOn){
+				turnOff("#rojo");
+				redIsOn = false;
+			}else if(greenIsOn){
+				turnOff("#verde");
+				greenIsOn = false;
+			}
+			yellowIsOn = true;
+		}
+	}
+	function turnOn(elementId){
+		var hex = rgb2hex($(elementId).css("background-color"));
+		var newColor = LightenDarkenColor(hex,90);
+		$(elementId).css("background-color", newColor);
+		var shadow = " 0 4px 8px 0 " + newColor;
+		$(elementId).css("box-shadow", shadow);
+	}
+
+
+	function turnOff(elementId){
+		var hex = rgb2hex($(elementId).css("background-color"));
+		var newColor = LightenDarkenColor(hex,-90);
+		$(elementId).css("background-color", newColor);
+		$(elementId).css("box-shadow", "");
+	}
+
+	function LightenDarkenColor(col, amt) {
+  
+    var usePound = false;
+    if (col[0] == "#") {
+        col = col.slice(1);
+        usePound = true;
+    }
+ 
+    var num = parseInt(col,16);
+    var r = (num >> 16) + amt;
+    if (r > 255) r = 255;
+    else if  (r < 0) r = 0;
+ 
+    var b = ((num >> 8) & 0x00FF) + amt; 
+    if (b > 255) b = 255;
+    else if  (b < 0) b = 0;
+ 
+    var g = (num & 0x0000FF) + amt;
+    if (g > 255) g = 255;
+    else if (g < 0) g = 0;
+
+    return (usePound?"#":"") + (g | (b << 8) | (r << 16)).toString(16);
+	}
+
+</script>
+</body>
+</html>
